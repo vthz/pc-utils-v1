@@ -45,6 +45,7 @@ class FileWriter:
             with open(self.file_name, mode='a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerows(data_to_write)
+            print(self.file_name)
         except Exception as e:
             print(e)
 
@@ -81,7 +82,7 @@ def generate_report():
             timestamp.add(row[-1])
 
         timestamp = list(timestamp)
-        fig = plt.figure("Drive Storage Pattern(" + timestamp[0] + "-" + timestamp[-1] + ")")
+        plt.figure("Drive Storage Pattern(" + timestamp[0] + "-" + timestamp[-1] + ")")
         plt.xlabel("Timestamp(Date+Time)")
         plt.ylabel("GBs")
         plt.title("Drive Storage Usage Pattern")
