@@ -3,6 +3,11 @@ import time
 import csv
 import os
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
+import typer
+
+app = typer.Typer()
+rcParams["figure.figsize"] = 12, 5
 
 
 class PCUtils:
@@ -31,7 +36,7 @@ class PCUtils:
 class FileWriter:
     def __init__(self):
         # timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(time.time()))
-        csv_file_path = os.path.join(os.getcwd(), f"PCUtils_v1.csv")
+        csv_file_path = os.path.join(os.getcwd(), f"PCUtils_DriveStats_v1.csv")
         self.file_name = csv_file_path
         self.csv_file_row_list = []
 
@@ -57,42 +62,49 @@ class FileWriter:
         return self.csv_file_row_list
 
 
+@app.command()
 def generate_report():
     file_writer_obj2 = FileWriter()
-    print("Generating report...")
-    data = file_writer_obj2.get_csv_file_row_list()
-    partition_set = set()
-    partition_data_dict = {}
-    for row in data:
-        partition_set.add(row[0])
-    for partition in partition_set:
-        partition_data_dict[partition] = []
-    timestamp = set()
-    for row in data:
-        partition_data_dict[row[0]].append(row[2])
-        timestamp.add(row[-1])
-    days_list = [i for i in range(len(partition_data_dict["C:\\"]))]
-    timestamp = list(timestamp)
+    try:
 
-    for keys in partition_data_dict.keys():
-        print(len(partition_data_dict[keys]))
-        plt.plot(timestamp, partition_data_dict[keys])
-    plt.xlabel("Timestamp")
-    plt.ylabel("GBs")
-    plt.title("Drive Storage Pattern(" + timestamp[0] + "-" + timestamp[-1] + ")")
-    plt.legend(loc=2)
-    plt.show()
+        print("Generating report...")
+        data = file_writer_obj2.get_csv_file_row_list()
+        partition_set = set()
+        partition_data_dict = {}
+        for row in data:
+            partition_set.add(row[0])
+        for partition in partition_set:
+            partition_data_dict[partition] = []
+        timestamp = set()
+        for row in data:
+            partition_data_dict[row[0]].append(row[2])
+            timestamp.add(row[-1])
 
-    print(partition_data_dict)
-    print(timestamp)
-    # print(partition_set)
+        timestamp = list(timestamp)
+        fig = plt.figure("Drive Storage Pattern(" + timestamp[0] + "-" + timestamp[-1] + ")")
+        plt.xlabel("Timestamp(Date+Time)")
+        plt.ylabel("GBs")
+        plt.title("Drive Storage Usage Pattern")
+        for keys in partition_data_dict.keys():
+            plt.plot(timestamp, partition_data_dict[keys], label=keys)
+        plt.legend(loc=1)
+        plt.show()
+    except Exception as e:
+        print(e)
+        print(f" Make sure you have {file_writer_obj2.file_name} in current working directory.")
 
 
-file_writer_obj = FileWriter()
-pc_utils_obj = PCUtils()
-pc_utils_obj.get_drive_storage_stats()
+@app.command()
+def record_drive_stats():
+    file_writer_obj = FileWriter()
+    pc_utils_obj = PCUtils()
+    pc_utils_obj.get_drive_storage_stats()
+    drive_stats = pc_utils_obj.get_disk_usage_stats()
+    file_writer_obj.write_to_csv(drive_stats)
+    print("Drive stats has been recorded")
 
-drive_stats = pc_utils_obj.get_disk_usage_stats()
-file_writer_obj.write_to_csv(drive_stats)
 
-generate_report()
+# generate_report()
+
+if __name__ == "__main__":
+    app()
