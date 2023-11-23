@@ -30,4 +30,4 @@ save the results for later analysis. Combine this with Task Scheduler and explor
     2. main.py generate-report
     3. main.py --help
 
-Note to self: Task Schedule task name : psutils_recorddrivestats
+**Note to self:** Task Scheduler task name : **psutils_recorddrivestats**
